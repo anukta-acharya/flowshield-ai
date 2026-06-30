@@ -1,65 +1,217 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { Brain, Target, Clock, Zap, Sparkles } from "lucide-react";
 
 export default function Home() {
+  const [task, setTask] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
+
+  async function analyze() {
+    if (!task) return;
+
+    setLoading(true);
+
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ task }),
+    });
+
+    const result = await res.json();
+
+    setData(result);
+    setLoading(false);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-[#050816] text-white">
+
+      <section className="mx-auto max-w-7xl p-10">
+
+        <div className="text-center">
+
+          <h1 className="text-6xl font-black">
+            FlowShield AI
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mt-5 text-xl text-gray-400">
+            AI that protects your focus before you miss a deadline.
           </p>
+
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="mt-14">
+
+          <textarea
+            value={task}
+            onChange={(e) => setTask(e.target.value)}
+            rows={6}
+            placeholder="Example: Complete my hackathon project by tomorrow..."
+            className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 outline-none"
+          />
+
+          <button
+            onClick={analyze}
+            className="mt-6 rounded-xl bg-blue-600 px-8 py-4 text-lg hover:bg-blue-500"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Analyze with Gemini
+          </button>
+
         </div>
-      </main>
+
+        {loading && (
+          <div className="mt-10 rounded-2xl bg-white/5 p-8">
+            <p>🧠 Calculating Flow Score...</p>
+            <p>📅 Predicting deadline success...</p>
+            <p>⚡ Generating recovery plan...</p>
+            <p>🤖 Thinking...</p>
+          </div>
+        )}
+
+        {data && !loading && (
+          <>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+              <Card
+                title="Flow Score"
+                value={`${data.flowScore}%`}
+                icon={<Zap />}
+              />
+
+              <Card
+                title="Deadline Success"
+                value={`${data.deadlineProbability}%`}
+                icon={<Target />}
+              />
+
+              <Card
+                title="Estimated Time"
+                value={data.estimatedTime}
+                icon={<Clock />}
+              />
+
+              <Card
+                title="Priority"
+                value={data.priority}
+                icon={<Sparkles />}
+              />
+
+            </div>
+
+            <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
+
+              <h2 className="mb-6 flex items-center gap-2 text-3xl font-bold">
+
+                <Brain />
+
+                Task Breakdown
+
+              </h2>
+
+              <div className="space-y-3">
+
+                {data.taskBreakdown?.map((item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-xl bg-black/20 p-4"
+                  >
+                    ✅ {item}
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+
+              <InfoCard
+                title="Biggest Distraction"
+                text={data.biggestDistraction}
+              />
+
+              <InfoCard
+                title="Next Action"
+                text={data.nextAction}
+              />
+
+              <InfoCard
+                title="Recovery Tip"
+                text={data.recoveryTip}
+              />
+
+            </div>
+
+            <div className="mt-8 rounded-3xl border border-blue-500/20 bg-gradient-to-r from-blue-600/20 to-purple-600/20 p-8">
+
+              <h2 className="text-3xl font-bold">
+                Motivation
+              </h2>
+
+              <p className="mt-4 text-lg">
+                {data.motivation}
+              </p>
+
+            </div>
+
+          </>
+        )}
+
+      </section>
+
+    </main>
+  );
+}
+
+function Card({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+
+      <div className="text-blue-400">{icon}</div>
+
+      <h3 className="mt-5 text-gray-400">
+        {title}
+      </h3>
+
+      <p className="mt-3 text-4xl font-bold">
+        {value}
+      </p>
+
+    </div>
+  );
+}
+
+function InfoCard({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+
+      <h3 className="mb-4 text-2xl font-bold">
+        {title}
+      </h3>
+
+      <p className="text-gray-300">
+        {text}
+      </p>
+
     </div>
   );
 }
