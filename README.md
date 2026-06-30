@@ -6,7 +6,6 @@
 
 An AI-powered productivity companion that predicts productivity risks before deadlines are missed.
 
-# Link
 https://flowshield-rbloq8pu3-anukta-acharyas-projects.vercel.app
 
 Built for **Google AI Hackathon 2026** 🚀
