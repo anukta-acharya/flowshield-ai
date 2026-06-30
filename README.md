@@ -384,15 +384,10 @@ GitHub:
 https://github.com/YOUR_USERNAME
 
 Email:
-your.email@example.com
+anukta.acharya24@gmail.com
 
 ---
 
-# 📜 License
-
-This project is licensed under the **MIT License**.
-
----
 
 <div align="center">
 
